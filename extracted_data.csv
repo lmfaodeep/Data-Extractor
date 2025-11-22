@@ -1,0 +1,50 @@
+KEY,VALUE,COMMENTS,PAGE
+name,Vijay Kumar,,1
+birth_date,"born on March 15, 1989",iso:1989-03-15,1
+birth_place,"Jaipur, Rajasthan",,1
+age,35 years old as of 2024,,1
+nationality,Indian,,1
+citizenship,Indian,,1
+blood_group,O+, ,1
+education_high_school,"St. Xavier's School, Jaipur",,1
+high_school_passing_year,2007,,1
+high_school_score,92.5%,,1
+education_bachelor,B.Tech in Computer Science at IIT Delhi,,1
+bachelor_graduation_year,2011,,1
+bachelor_cgpa,8.7,,1
+bachelor_rank,15th among 120 students,,1
+education_master,M.Tech in Data Science at IIT Bombay,,1
+master_cgpa,9.2,,1
+thesis_score,95,,1
+graduation_year_master,2013,,1
+academic_rank,15th among 120 students,,1
+graduation_year,2011,,1
+certification_aws,"AWS Solutions Architect, score 920/1000, year 2019",,1
+certification_azure,"Azure Data Engineer, score 875, year 2020",,1
+certification_pmp,"Project Management Professional (PMP), rating Above Target, year 2021",,1
+certification_safe,"SAFe Agilist, score 98%",,1
+exam_scores,AWS 920/1000; Azure 875; SAFe 98%,,1
+skill_sql,10 out of 10,daily usage since 2012,1
+skill_python,9 out of 10,over seven years of practical experience,1
+skill_machine_learning,8 out of 10,five years of hands-on implementation,1
+skill_cloud,9 out of 10,"AWS and Azure certifications, more than four years of experience",1
+skill_data_visualization,8 out of 10,Power BI and Tableau,1
+work_start_date,"June 15, 2021",iso:2021-06-15,1
+current_employer,Resse Analytics,,1
+current_job,Senior Data Engineer,,1
+work_end_date,Present,,1
+previous_employer,LakeCorp Solutions,,1
+previous_job,Data Analyst,,1
+promotion_date,2019,,1
+first_job_start,"July 1, 2012",iso:2012-07-01,1
+first_job_salary,350000,,1
+salary_current,2800000,,1
+salary_increase_factor,8x,,1
+first_job_role,Junior Developer,,1
+previous_job_start_date,"February 1, 2018",iso:2018-02-01,1
+previous_job_end_date,2021,,1
+education_high_school_subjects,"Mathematics, Physics, Chemistry, Computer Science",,1
+education_bachelor_institution,IIT Delhi,,1
+education_bachelor_department,Computer Science,,1
+education_master_institution,IIT Bombay,,1
+education_master_department,Data Science,,1
