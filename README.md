@@ -4,7 +4,7 @@
 3. Run your Python file normally.
 4. The extracted data will be saved in your local folder as both CSV and XLSX formats.
 
-
+___________________________________________________________________________________________________________________
 
 -This project is an automated data-extraction system designed to convert unstructured documents such as PDFs, scanned files, and text-heavy reports into clean, structured CSV or Excel outputs using the OpenAI Responses API. The goal is to transform messy narrative documents into machine-ready tabular data with minimal manual intervention.
 
