@@ -11,10 +11,52 @@ from io import StringIO
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "Set OPENAI_API_KEY as API in env"
 
-#USING THE FILE ID THAT IS UPLOADED TO OPENAI
-FILE_ID = "file-B4Pco3TY8DbwttGt8QABuf"  
-MODEL = "gpt-5-nano"                 #change if you need another model you have access to
 
+#Local file upload path
+
+LOCAL_FILE_PATH = ""   # Example: "C:/Users/You/Desktop/input.pdf"
+
+# Existing file ID (if you already uploaded to openai)
+FILE_ID = "file-B4Pco3TY8DbwttGt8QABuf"
+
+
+MODEL = "gpt-5-nano"
+
+
+def upload_local_file(filepath):
+    """Upload a local file to OpenAI and return its file_id."""
+    mime = "application/octet-stream"
+    if filepath.lower().endswith(".pdf"):
+        mime = "application/pdf"
+    elif filepath.lower().endswith(".xlsx"):
+        mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    with open(filepath, "rb") as f:
+        resp = requests.post(
+            "https://api.openai.com/v1/files",
+            headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
+            data={"purpose": "user_data"},
+            files={"file": (os.path.basename(filepath), f, mime)},
+        )
+    resp.raise_for_status()
+    file_id = resp.json().get("id")
+    print(f"Uploaded local file. Received file_id: {file_id}")
+    return file_id
+
+
+# ======================
+# If FILE_ID missing, upload local file
+# ======================
+if not FILE_ID:
+    if not LOCAL_FILE_PATH:
+        raise SystemExit("ERROR: No FILE_ID and no LOCAL_FILE_PATH provided.")
+    print(f"Uploading local file: {LOCAL_FILE_PATH}")
+    FILE_ID = upload_local_file(LOCAL_FILE_PATH)
+else:
+    print(f"Using existing file_id: {FILE_ID}")
+
+
+#prompt
 QUESTION = """ #
 Extract ALL structured information from the document and return ONLY a CSV. 
 No explanations, no markdown, no JSON - just clean CSV.
@@ -61,11 +103,13 @@ skill_sql,10 out of 10,daily usage since 2012,1
 Extract EVERYTHING you find in the document.
 """.strip()
 
+
 RESPONSES_URL = "https://api.openai.com/v1/responses"
 HEADERS = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
 
 MAX_RETRIES = 6
 BASE_WAIT = 1.0
+
 
 def flatten_json(prefix, obj, rows):
     if isinstance(obj, dict):
@@ -77,28 +121,26 @@ def flatten_json(prefix, obj, rows):
     else:
         rows.append((prefix, obj))
 
+
 def extract_csv_from_text(text):
-    """Extract CSV data from text and return as DataFrame"""
     lines = text.strip().split('\n')
     csv_lines = []
     in_csv = False
     
     for line in lines:
-        
         if line.startswith('KEY,VALUE,COMMENTS,PAGE'):
             in_csv = True
             csv_lines = [line]
             continue
         elif in_csv:
-            #Stop if we hit a non-CSV line
             if not line or ',' not in line or line.startswith('---'):
                 break
             csv_lines.append(line)
     
     if len(csv_lines) > 1:
-        csv_text = '\n'.join(csv_lines)
-        return pd.read_csv(StringIO(csv_text))
+        return pd.read_csv(StringIO('\n'.join(csv_lines)))
     return None
+
 
 def call_responses_with_file(file_id):
     payload = {
@@ -113,6 +155,7 @@ def call_responses_with_file(file_id):
             }
         ],
     }
+
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             resp = requests.post(RESPONSES_URL, headers=HEADERS, json=payload, timeout=120)
@@ -145,13 +188,13 @@ def call_responses_with_file(file_id):
             time.sleep(wait)
             continue
 
-        #return parsed error JSON for inspection
         try:
             return resp.json()
         except Exception:
             return {"error": {"message": resp.text, "status_code": resp.status_code}}
 
     raise SystemExit(f"Failed after {MAX_RETRIES} attempts due to repeated 429/5xx errors.")
+
 
 def main():
     resp_json = call_responses_with_file(FILE_ID)
@@ -163,7 +206,6 @@ def main():
     print("\n=== Full response (trimmed) ===")
     print(json.dumps(resp_json, indent=2)[:4000])
 
-    # extract text blocks
     extracted_texts = []
     outputs = resp_json.get("output") or resp_json.get("results") or []
     if isinstance(outputs, dict):
@@ -192,7 +234,6 @@ def main():
         for i, t in enumerate(extracted_texts, 1):
             print(f"\n--- Block {i} ---\n{t[:3000]}")
 
-    # flatten and write full response to Excel
     rows = []
     flatten_json("", resp_json, rows)
     df = pd.DataFrame(rows, columns=["path", "value"])
@@ -200,7 +241,6 @@ def main():
     df.to_excel(flat_excel, index=False)
     print(f"\nFlattened response written to: {flat_excel}")
 
-    #NEW: Extract and save CSV data
     csv_data_found = False
     for text in extracted_texts:
         if "KEY,VALUE,COMMENTS,PAGE" in text:
@@ -210,7 +250,6 @@ def main():
                 csv_df.to_csv(csv_output, index=False)
                 print(f"Extracted CSV data written to: {csv_output}")
                 
-                # Also save as Excel for better formatting
                 excel_output = "extracted_data.xlsx"
                 csv_df.to_excel(excel_output, index=False)
                 print(f"Extracted data written to: {excel_output}")
@@ -222,6 +261,7 @@ def main():
     
     if not csv_data_found:
         print("No CSV data found in response")
+
 
 if __name__ == "__main__":
     main()
